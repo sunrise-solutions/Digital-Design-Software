@@ -17,6 +17,7 @@ import java.io.FileReader;
 import java.awt.BorderLayout;
 import javax.swing.SwingConstants;
 import javax.swing.JTextArea;
+import javax.swing.JLabel;
 
 public class Parser {
 
@@ -27,6 +28,8 @@ public class Parser {
 	private JTextArea sourceCode;
 	private JTextArea resultCode;
 	private JScrollPane sourceScroll, resultScroll;
+	private JLabel lblSourceCode;
+	private JLabel lblResultCode;
 
 	/**
 	 * Launch the application.
@@ -56,8 +59,9 @@ public class Parser {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		frame.setVisible(true);
+		frame.setBounds(50, 50, 814, 540);
+		//frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		//frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		menubar = new JMenuBar();
@@ -82,10 +86,18 @@ public class Parser {
 		sourceScroll = new JScrollPane(sourceCode, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		frame.getContentPane().add(sourceScroll, BorderLayout.WEST);
 		
+		lblSourceCode = new JLabel("Source code");
+		lblSourceCode.setHorizontalAlignment(SwingConstants.CENTER);
+		sourceScroll.setColumnHeaderView(lblSourceCode);
+		
 		resultCode = new JTextArea(40, 45);
 		frame.getContentPane().add(resultCode, BorderLayout.EAST);
 		resultScroll = new JScrollPane(resultCode, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		frame.getContentPane().add(resultScroll, BorderLayout.EAST);
+		
+		lblResultCode = new JLabel("Result code");
+		lblResultCode.setHorizontalAlignment(SwingConstants.CENTER);
+		resultScroll.setColumnHeaderView(lblResultCode);
 		
 		open.addActionListener(new ActionListener() {
 			@Override
