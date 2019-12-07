@@ -7,6 +7,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 
 import java.awt.event.ActionEvent;
@@ -30,6 +31,8 @@ public class Parser {
 	private JScrollPane sourceScroll, resultScroll;
 	private JLabel lblSourceCode;
 	private JLabel lblResultCode;
+	private JTable identTable;
+	private JScrollPane identScroll;
 
 	/**
 	 * Launch the application.
@@ -98,6 +101,15 @@ public class Parser {
 		lblResultCode = new JLabel("Result code");
 		lblResultCode.setHorizontalAlignment(SwingConstants.CENTER);
 		resultScroll.setColumnHeaderView(lblResultCode);
+		
+		//btnFindIdentificators = new JButton("Find identificators");
+				//btnFindIdentificators.setSize(80, 30);
+				//frame.getContentPane().add(btnFindIdentificators);
+				
+		TableModel model = new TableModel();
+		identTable = new JTable(model);
+		identScroll = new JScrollPane(identTable);
+		frame.getContentPane().add(identScroll, SwingConstants.CENTER);
 		
 		open.addActionListener(new ActionListener() {
 			@Override
