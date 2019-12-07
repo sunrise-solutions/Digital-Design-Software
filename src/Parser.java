@@ -19,6 +19,10 @@ import java.awt.BorderLayout;
 import javax.swing.SwingConstants;
 import javax.swing.JTextArea;
 import javax.swing.JLabel;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.JButton;
+import javax.swing.LayoutStyle.ComponentPlacement;
 
 public class Parser {
 
@@ -62,7 +66,7 @@ public class Parser {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(50, 50, 814, 540);
+		frame.setBounds(50, 50, 1155, 732);
 		//frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		//frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -87,7 +91,6 @@ public class Parser {
 		sourceCode = new JTextArea(40, 45);
 		frame.getContentPane().add(sourceCode, BorderLayout.WEST);
 		sourceScroll = new JScrollPane(sourceCode, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		frame.getContentPane().add(sourceScroll, BorderLayout.WEST);
 		
 		lblSourceCode = new JLabel("Source code");
 		lblSourceCode.setHorizontalAlignment(SwingConstants.CENTER);
@@ -96,20 +99,46 @@ public class Parser {
 		resultCode = new JTextArea(40, 45);
 		frame.getContentPane().add(resultCode, BorderLayout.EAST);
 		resultScroll = new JScrollPane(resultCode, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		frame.getContentPane().add(resultScroll, BorderLayout.EAST);
 		
 		lblResultCode = new JLabel("Result code");
 		lblResultCode.setHorizontalAlignment(SwingConstants.CENTER);
 		resultScroll.setColumnHeaderView(lblResultCode);
 		
-		//btnFindIdentificators = new JButton("Find identificators");
-				//btnFindIdentificators.setSize(80, 30);
-				//frame.getContentPane().add(btnFindIdentificators);
-				
 		TableModel model = new TableModel();
 		identTable = new JTable(model);
 		identScroll = new JScrollPane(identTable);
 		frame.getContentPane().add(identScroll, SwingConstants.CENTER);
+		
+		JButton btnFindIdentificators = new JButton("Find identificators");
+		
+		GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
+		groupLayout.setHorizontalGroup(
+			groupLayout.createParallelGroup(Alignment.LEADING)
+				.addGroup(groupLayout.createSequentialGroup()
+					.addComponent(sourceScroll, GroupLayout.PREFERRED_SIZE, 424, GroupLayout.PREFERRED_SIZE)
+					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+						.addGroup(groupLayout.createSequentialGroup()
+							.addGap(35)
+							.addComponent(identScroll, GroupLayout.PREFERRED_SIZE, 223, GroupLayout.PREFERRED_SIZE))
+						.addGroup(groupLayout.createSequentialGroup()
+							.addGap(86)
+							.addComponent(btnFindIdentificators)))
+					.addPreferredGap(ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
+					.addComponent(resultScroll, GroupLayout.PREFERRED_SIZE, 424, GroupLayout.PREFERRED_SIZE))
+		);
+		groupLayout.setVerticalGroup(
+			groupLayout.createParallelGroup(Alignment.LEADING)
+				.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+					.addComponent(sourceScroll, GroupLayout.DEFAULT_SIZE, 673, Short.MAX_VALUE)
+					.addComponent(resultScroll, GroupLayout.DEFAULT_SIZE, 673, Short.MAX_VALUE))
+				.addGroup(groupLayout.createSequentialGroup()
+					.addGap(27)
+					.addComponent(btnFindIdentificators)
+					.addGap(18)
+					.addComponent(identScroll, GroupLayout.PREFERRED_SIZE, 308, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap(297, Short.MAX_VALUE))
+		);
+		frame.getContentPane().setLayout(groupLayout);
 		
 		open.addActionListener(new ActionListener() {
 			@Override
