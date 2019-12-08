@@ -55,6 +55,5 @@ public class TableModel extends AbstractTableModel {
 	
 	public void deleteData() {
 	    data.clear();
-	    fireTableChanged(null);
-	  }
+	}
 }

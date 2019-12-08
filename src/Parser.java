@@ -122,12 +122,12 @@ public class Parser {
 		identScroll = new JScrollPane(identTable);
 		frame.getContentPane().add(identScroll, SwingConstants.CENTER);
 		
-		entity = new Entity();
 		JButton btnFindIdentificators = new JButton("Find identificators");
 		btnFindIdentificators.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				model.deleteData();
-				parseFile(entity, sourceCode.getText());
+				identTable.revalidate();
+				parseFile(sourceCode.getText());
 			}
 		});
 		
@@ -180,19 +180,20 @@ public class Parser {
 		}
 	}
 	
-	private void parseFile(Entity e, String content) {
+	private void parseFile(String content) {
 		try
         {
-            FileParser parser = new FileParser(content);
-            parser.ParseFile(e);
+			entity = new Entity();
+            FileParser parser = new FileParser(content.toLowerCase());
+            parser.ParseFile(entity);
             for (Item item: parser.entity.items) {
-            	model.addFirstColumn(item.Name);
+            	model.addFirstColumn(item.getName());
             	identTable.revalidate();
             }
         }
         catch (Exception ex)
         {
-        	JOptionPane.showMessageDialog(frame, e.toString());
+        	JOptionPane.showMessageDialog(frame, ex.toString());
         }
 	}
 }
