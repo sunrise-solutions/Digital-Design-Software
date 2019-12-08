@@ -10,6 +10,6 @@ public class Item {
 	}
 	
 	public String getName() {
-		return Name + " " + Type;
+		return Name + " ( " + Type + " )";
 	}
 }

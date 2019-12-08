@@ -48,29 +48,42 @@ public class EntityReader {
         	}
         }
     }
-
-    public ArrayList<Item> getEntityItems(Entity component) {
+    
+    public ArrayList<Item> getProcesses() {
     	ArrayList<Item> result = new ArrayList<Item>();
+    	for (int i = 2; i < listContent.size(); i = i + 1) {
+    		if (listContent.get(i).contains("process") && listContent.get(i - 1).contains(":")) {
+    			Item item = new Item(listContent.get(i - 2), "process");
+                result.add(item);
+    		}
+    	}
+    	
+		return result;
+    }
+
+    public ArrayList<Item> getEntityItems(Entity component, String upperBound, String mark, String lowerBound) {
+    	ArrayList<Item> result = new ArrayList<Item>();
+    	listEntity.clear();
         int indexOfEntity = 0;
         int indexOfStart = 0;
         int indexOfEnd = 0;
         String entityName = "";
-        indexOfEntity = listContent.indexOf("entity");
+        indexOfEntity = listContent.indexOf(upperBound);
         if (indexOfEntity != 0)                           
             entityName = listContent.get(indexOfEntity + 1);
-        
         component.Name = entityName;
-        for (int i = 0; i < listContent.size(); i++) {                
-            if(listContent.get(i).contains("port")) {
-            	indexOfStart = i;
+        
+        //indexOfEnd = listContent.indexOf("end");
+        for (int i = indexOfStart + 1; i < listContent.size(); i++) {                
+            if(listContent.get(i).contains(lowerBound)) {
+            	indexOfEnd = i;
                 break;
             }
         }
         
-        //indexOfEnd = listContent.indexOf("end");
-        for (int i = 0; i < listContent.size(); i++) {                
-            if(listContent.get(i).contains("end")) {
-            	indexOfEnd = i;
+        for (int i = indexOfEntity + 1 ; i < indexOfEnd; i++) {                
+            if(listContent.get(i).contains(mark)) {
+            	indexOfStart = i;
                 break;
             }
         }
@@ -86,12 +99,19 @@ public class EntityReader {
         while (currentPos < listEntity.size()) {
         	type = getCurrentType(currentPos);
             if (!type.equals("")) {
-                indexOfType = getIndexOfElement(listEntity, type, currentPos);
+            	if (type.equals(mark)) {
+            		indexOfType = getIndexOfElement(listEntity, ":", currentPos);
+            	} else {
+            		indexOfType = getIndexOfElement(listEntity, type, currentPos);
+            	}
+            	
                 ArrayList<String> listCurrentItems = new ArrayList<String>();
                 listCurrentItems = getItems(currentPos, indexOfType);
                 for (String itemName: listCurrentItems) {
-                    Item item = new Item(itemName, type);
-                    result.add(item);
+                	if (!itemName.equals(type)) {
+                		Item item = new Item(itemName, type);
+                        result.add(item);
+                	}
                 }
                 
                 currentPos = findNextPart(indexOfType);
@@ -106,6 +126,26 @@ public class EntityReader {
         for (int i = currentPos; i < listEntity.size(); i = i + 1 ) {
         	if (listEntity.get(i).equals("in") || listEntity.get(i).equals("out") || listEntity.get(i).equals("inout")) {
         		type = listEntity.get(i);
+        		break;
+        	}
+        	
+        	if ( (i != currentPos) && listEntity.get(i - 1).contains("signal")) {
+        		type = "signal";
+        		break;
+        	}
+        	
+        	if ( (i != currentPos) && listEntity.get(i - 1).contains("variable")) {
+        		type = "variable";
+        		break;
+        	}
+        	
+        	if ( (i != currentPos) && listEntity.get(i - 1).contains("constant")) {
+        		type = "constant";
+        		break;
+        	}
+        	
+        	if (listEntity.get(i).contains("process")) {
+        		type = "process";
         		break;
         	}
         }

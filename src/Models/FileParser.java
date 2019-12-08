@@ -15,6 +15,7 @@ public class FileParser {
     private String deleteComments(String content) {
     	int stopIndex = 0;
     	String code = "";
+    	String temp = "";
     	for (String row: content.split("\n")) {
     		stopIndex = row.length();
     		for (int i = 0; i < row.length(); i = i + 1) {
@@ -23,7 +24,9 @@ public class FileParser {
     				break;
     			}
     		}
-    		code += row.substring(0,  stopIndex) + "\r\n";
+    		temp = row.substring(0,  stopIndex).trim();
+    		temp = temp.replace(":", " : ");
+    		code += (!temp.equals("")) ? (temp + "\r\n") : "";
     	}
     	
     	return code;
@@ -32,7 +35,13 @@ public class FileParser {
     public void ParseFile(Entity e) {
     	entity = e;
         reader.fileToList();
-        ArrayList<Item> items = reader.getEntityItems(entity);
+        ArrayList<Item> items = reader.getEntityItems(entity, "entity", "port", "end");
+        items.addAll(reader.getEntityItems(entity, "architecture", "signal", "begin"));
+        items.addAll(reader.getEntityItems(entity, "architecture", "variable", "begin"));
+        items.addAll(reader.getEntityItems(entity, "architecture", "constant", "begin"));
+        items.addAll(reader.getProcesses());
         entity.AddItems(items);
+        //ArrayList<Item> processes = reader.getEntityItems(entity, "architecture", "begin", "");
+        //entity.AddItems(processes);
     } 
 }
