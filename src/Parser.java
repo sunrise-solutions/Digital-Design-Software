@@ -8,7 +8,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,6 +23,10 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
+import Models.Entity;
+import Models.FileParser;
+import Models.Item;
+
 public class Parser {
 
 	private JFrame frame;
@@ -37,6 +40,10 @@ public class Parser {
 	private JLabel lblResultCode;
 	private JTable identTable;
 	private JScrollPane identScroll;
+	
+	private TableModel model;
+	private String sourceFile;
+	private Entity entity;
 
 	/**
 	 * Launch the application.
@@ -66,7 +73,7 @@ public class Parser {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(50, 50, 1155, 732);
+		frame.setBounds(50, 50, 1357, 732);
 		//frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		//frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -74,6 +81,12 @@ public class Parser {
 		menubar = new JMenuBar();
 		file = new JMenu("File");
 		open = new JMenuItem("Open");
+		open.addActionListener(new ActionListener() {
+			@Override
+            public void actionPerformed(ActionEvent arg0) {
+				 openFile();
+			}
+		});
 		file.add(open);
 		save = new JMenuItem("Save");
 		file.add(save);
@@ -88,43 +101,47 @@ public class Parser {
 		menubar.add(file);
 		frame.setJMenuBar(menubar);
 		
-		sourceCode = new JTextArea(40, 45);
+		sourceCode = new JTextArea(20, 40);
 		frame.getContentPane().add(sourceCode, BorderLayout.WEST);
-		sourceScroll = new JScrollPane(sourceCode, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		sourceScroll = new JScrollPane(sourceCode, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
 		lblSourceCode = new JLabel("Source code");
 		lblSourceCode.setHorizontalAlignment(SwingConstants.CENTER);
 		sourceScroll.setColumnHeaderView(lblSourceCode);
 		
-		resultCode = new JTextArea(40, 45);
+		resultCode = new JTextArea(20, 40);
 		frame.getContentPane().add(resultCode, BorderLayout.EAST);
-		resultScroll = new JScrollPane(resultCode, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		resultScroll = new JScrollPane(resultCode, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
 		lblResultCode = new JLabel("Result code");
 		lblResultCode.setHorizontalAlignment(SwingConstants.CENTER);
 		resultScroll.setColumnHeaderView(lblResultCode);
 		
-		TableModel model = new TableModel();
+		model = new TableModel();
 		identTable = new JTable(model);
 		identScroll = new JScrollPane(identTable);
 		frame.getContentPane().add(identScroll, SwingConstants.CENTER);
 		
+		entity = new Entity();
 		JButton btnFindIdentificators = new JButton("Find identificators");
+		btnFindIdentificators.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				model.deleteData();
+				parseFile(entity, sourceCode.getText());
+			}
+		});
 		
 		GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
 		groupLayout.setHorizontalGroup(
-			groupLayout.createParallelGroup(Alignment.LEADING)
+			groupLayout.createParallelGroup(Alignment.TRAILING)
 				.addGroup(groupLayout.createSequentialGroup()
-					.addComponent(sourceScroll, GroupLayout.PREFERRED_SIZE, 424, GroupLayout.PREFERRED_SIZE)
-					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(groupLayout.createSequentialGroup()
-							.addGap(35)
-							.addComponent(identScroll, GroupLayout.PREFERRED_SIZE, 223, GroupLayout.PREFERRED_SIZE))
-						.addGroup(groupLayout.createSequentialGroup()
-							.addGap(86)
-							.addComponent(btnFindIdentificators)))
-					.addPreferredGap(ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
-					.addComponent(resultScroll, GroupLayout.PREFERRED_SIZE, 424, GroupLayout.PREFERRED_SIZE))
+					.addComponent(sourceScroll, GroupLayout.PREFERRED_SIZE, 462, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED, 60, Short.MAX_VALUE)
+					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
+						.addComponent(btnFindIdentificators, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(identScroll, GroupLayout.DEFAULT_SIZE, 259, Short.MAX_VALUE))
+					.addGap(55)
+					.addComponent(resultScroll, GroupLayout.PREFERRED_SIZE, 447, GroupLayout.PREFERRED_SIZE))
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
@@ -132,37 +149,50 @@ public class Parser {
 					.addComponent(sourceScroll, GroupLayout.DEFAULT_SIZE, 673, Short.MAX_VALUE)
 					.addComponent(resultScroll, GroupLayout.DEFAULT_SIZE, 673, Short.MAX_VALUE))
 				.addGroup(groupLayout.createSequentialGroup()
-					.addGap(27)
+					.addGap(34)
 					.addComponent(btnFindIdentificators)
-					.addGap(18)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addComponent(identScroll, GroupLayout.PREFERRED_SIZE, 308, GroupLayout.PREFERRED_SIZE)
 					.addContainerGap(297, Short.MAX_VALUE))
 		);
 		frame.getContentPane().setLayout(groupLayout);
-		
-		open.addActionListener(new ActionListener() {
-			@Override
-            public void actionPerformed(ActionEvent arg0) {
-				 FileDialog fd = new FileDialog(frame, "Choose a file", FileDialog.LOAD);
-				 fd.setDirectory("C:\\VHDL_examples");
-				 fd.setFile("*.vhd");
-				 fd.setVisible(true);
-				 try {
-					 String filename = fd.getDirectory() + fd.getFile();
-					 File file = new File(filename);
-					 BufferedReader br;
-					 br = new BufferedReader(new FileReader(file));
-					 String st;
-					 sourceCode.selectAll();
-					 sourceCode.replaceSelection("");
-					 while ((st = br.readLine()) != null) {
-						 sourceCode.setText(sourceCode.getText() + System.lineSeparator() + st);
-					 }
-					 br.close();
-				 } catch (Exception e) {
-					 JOptionPane.showMessageDialog(frame, e.toString());
-				 }
+	}
+	
+	private void openFile() {
+		FileDialog fd = new FileDialog(frame, "Choose a file", FileDialog.LOAD);
+		fd.setDirectory("C:\\VHDL_examples");
+		fd.setFile("*.vhd");
+		fd.setVisible(true);
+		try {
+			sourceFile = fd.getDirectory() + fd.getFile();
+			File file = new File(sourceFile);
+			BufferedReader br;
+			br = new BufferedReader(new FileReader(file));
+			String st;
+			sourceCode.selectAll();
+			sourceCode.replaceSelection("");
+			while ((st = br.readLine()) != null) {
+				sourceCode.setText(sourceCode.getText() + System.lineSeparator() + st);
 			}
-		});
+			br.close();
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(frame, e.toString());
+		}
+	}
+	
+	private void parseFile(Entity e, String content) {
+		try
+        {
+            FileParser parser = new FileParser(content);
+            parser.ParseFile(e);
+            for (Item item: parser.entity.items) {
+            	model.addFirstColumn(item.Name);
+            	identTable.revalidate();
+            }
+        }
+        catch (Exception ex)
+        {
+        	JOptionPane.showMessageDialog(frame, e.toString());
+        }
 	}
 }

@@ -24,6 +24,11 @@ public class TableModel extends AbstractTableModel {
 		data.add(rowTable);
 	}
 	
+	public void addFirstColumn(String ident) {
+		String[] rowTable = {ident, ""};
+		data.add(rowTable);
+	}
+	
 	@Override
 	public int getRowCount() {
 		return data.size();
@@ -47,4 +52,9 @@ public class TableModel extends AbstractTableModel {
 		}
 		return "";
 	}
+	
+	public void deleteData() {
+	    data.clear();
+	    fireTableChanged(null);
+	  }
 }
