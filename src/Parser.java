@@ -26,7 +26,6 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import Models.Entity;
 import Models.FileParser;
 import Models.Item;
-import Models.Obfuscator;
 
 public class Parser {
 
@@ -194,8 +193,6 @@ public class Parser {
             	model.addFirstColumn(item.getName());
             	identTable.revalidate();
             }
-            Obfuscator obfuscator = new Obfuscator(content.toLowerCase(), parser.entity.items);
-            obfuscator.ObfuscateCode();
         }
         catch (Exception ex)
         {
