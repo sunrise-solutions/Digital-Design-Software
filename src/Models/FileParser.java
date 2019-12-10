@@ -26,6 +26,7 @@ public class FileParser {
     		}
     		temp = row.substring(0,  stopIndex).trim();
     		temp = temp.replace(":", " : ");
+    		temp = temp.replace(",", " , ");
     		code += (!temp.equals("")) ? (temp + "\r\n") : "";
     	}
     	
@@ -39,9 +40,8 @@ public class FileParser {
         items.addAll(reader.getEntityItems(entity, "architecture", "signal", "begin"));
         items.addAll(reader.getEntityItems(entity, "architecture", "variable", "begin"));
         items.addAll(reader.getEntityItems(entity, "architecture", "constant", "begin"));
+        items.addAll(reader.getEntityItems(entity, "entity", "generic", ")"));
         items.addAll(reader.getProcesses());
         entity.AddItems(items);
-        //ArrayList<Item> processes = reader.getEntityItems(entity, "architecture", "begin", "");
-        //entity.AddItems(processes);
     } 
 }

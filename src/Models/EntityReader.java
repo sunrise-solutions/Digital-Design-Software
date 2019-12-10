@@ -93,20 +93,20 @@ public class EntityReader {
                 listEntity.add(listContent.get(i));
         }
         
-        int indexOfType = 0;
+        int indexOfDelimiter = 0;
         int currentPos = 0;
         String type = "";
         while (currentPos < listEntity.size()) {
-        	type = getCurrentType(currentPos);
+        	type = getCurrentType(currentPos, mark);
             if (!type.equals("")) {
             	if (type.equals(mark)) {
-            		indexOfType = getIndexOfElement(listEntity, ":", currentPos);
+            		indexOfDelimiter = getIndexOfElement(listEntity, ":", currentPos);
             	} else {
-            		indexOfType = getIndexOfElement(listEntity, type, currentPos);
+            		indexOfDelimiter = getIndexOfElement(listEntity, type, currentPos);
             	}
             	
                 ArrayList<String> listCurrentItems = new ArrayList<String>();
-                listCurrentItems = getItems(currentPos, indexOfType);
+                listCurrentItems = getItems(currentPos, indexOfDelimiter);
                 for (String itemName: listCurrentItems) {
                 	if (!itemName.equals(type)) {
                 		Item item = new Item(itemName, type);
@@ -114,14 +114,14 @@ public class EntityReader {
                 	}
                 }
                 
-                currentPos = findNextPart(indexOfType);
+                currentPos = findNextPart(indexOfDelimiter);
             }
         }
         
         return result;
     }
 
-    public String getCurrentType(int currentPos) {
+    public String getCurrentType(int currentPos, String mark) {
         String type = "";
         for (int i = currentPos; i < listEntity.size(); i = i + 1 ) {
         	if (listEntity.get(i).equals("in") || listEntity.get(i).equals("out") || listEntity.get(i).equals("inout")) {
@@ -129,23 +129,13 @@ public class EntityReader {
         		break;
         	}
         	
-        	if ( (i != currentPos) && listEntity.get(i - 1).contains("signal")) {
-        		type = "signal";
+        	if ( (i != currentPos) && listEntity.get(i - 1).contains(mark)) {
+        		type = mark;
         		break;
         	}
         	
-        	if ( (i != currentPos) && listEntity.get(i - 1).contains("variable")) {
-        		type = "variable";
-        		break;
-        	}
-        	
-        	if ( (i != currentPos) && listEntity.get(i - 1).contains("constant")) {
-        		type = "constant";
-        		break;
-        	}
-        	
-        	if (listEntity.get(i).contains("process")) {
-        		type = "process";
+        	if ( (mark.equals("generic")) && listEntity.get(i).contains(":")) {
+        		type = mark;
         		break;
         	}
         }
@@ -210,8 +200,10 @@ public class EntityReader {
                 break;
             }
 
-            if (k == listEntity.size() - 1 && flag == false)
-                break;
+            if (k == listEntity.size() - 1 && flag == false) {
+            	position = k;
+            	break;
+            }
         }
         
         position++;
