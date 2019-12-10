@@ -42,6 +42,7 @@ public class FileParser {
         items.addAll(reader.getEntityItems(entity, "architecture", "constant", "begin"));
         items.addAll(reader.getEntityItems(entity, "entity", "generic", ")"));
         items.addAll(reader.getProcesses());
+        items.addAll(reader.getProcessItems(entity, "process", "variable", "begin"));
         entity.AddItems(items);
     } 
 }

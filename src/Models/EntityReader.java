@@ -60,10 +60,54 @@ public class EntityReader {
     	
 		return result;
     }
-
-    public ArrayList<Item> getEntityItems(Entity component, String upperBound, String mark, String lowerBound) {
+    
+    public ArrayList<Item> getProcessItems(Entity component, String upperBound, String keyword, String lowerBound) {
     	ArrayList<Item> result = new ArrayList<Item>();
-    	listEntity.clear();
+    	int currentPos = -1;
+    	int indexOfProcess = -1;
+    	int indexOfStart = -1;
+    	int indexOfEnd = -1;
+    	while (currentPos < listContent.size()) {
+    		
+    		for (int i = currentPos + 1; i < listContent.size(); i++) {                
+                if(listContent.get(i).contains(upperBound)) {
+                    if(!((i != 0) && (listContent.get(i - 1).contains("end")))) {
+                    	indexOfProcess = i;
+                        break;
+                	}
+                }
+            }
+    		
+    		for (int i = indexOfProcess + 1; i < listContent.size(); i++) {                
+                if(listContent.get(i).contains(keyword)) {
+                	indexOfStart = i;
+                    break;
+                }
+            }
+    		
+    		for (int i = indexOfStart + 1; i < listContent.size(); i++) {                
+                if(listContent.get(i).contains(lowerBound)) {
+                	indexOfEnd = i;
+                    break;
+                }
+            }
+    		
+    		if ((indexOfStart != -1) && (indexOfEnd != -1) && (indexOfProcess != -1)) {
+    			result.addAll(getItemsInBlock(indexOfStart, indexOfEnd, keyword));
+    		} else 
+    			break;
+    		
+    		currentPos = indexOfEnd;
+    		indexOfStart = -1;
+    		indexOfEnd = -1;
+    		indexOfProcess = -1;
+    	}
+    	
+		return result;
+    }
+
+    public ArrayList<Item> getEntityItems(Entity component, String upperBound, String keyword, String lowerBound) {
+    	ArrayList<Item> result = new ArrayList<Item>();
         int indexOfEntity = 0;
         int indexOfStart = 0;
         int indexOfEnd = 0;
@@ -82,24 +126,32 @@ public class EntityReader {
         }
         
         for (int i = indexOfEntity + 1 ; i < indexOfEnd; i++) {                
-            if(listContent.get(i).contains(mark)) {
+            if(listContent.get(i).contains(keyword)) {
             	indexOfStart = i;
                 break;
             }
         }
         
-        if (indexOfStart != 0 && indexOfEnd != 0) {
+        if (indexOfStart != 0 && indexOfEnd != 0)
+        	result.addAll(getItemsInBlock(indexOfStart, indexOfEnd, keyword));
+        return result;
+    }
+    
+    public ArrayList<Item> getItemsInBlock(int indexOfStart, int indexOfEnd, String keyword) {
+    	listEntity.clear();
+    	if (indexOfStart != 0 && indexOfEnd != 0) {
             for (int i = indexOfStart; i < indexOfEnd; i++)
                 listEntity.add(listContent.get(i));
         }
-        
-        int indexOfDelimiter = 0;
+    	
+    	ArrayList<Item> result = new ArrayList<Item>();
+    	int indexOfDelimiter = 0;
         int currentPos = 0;
         String type = "";
         while (currentPos < listEntity.size()) {
-        	type = getCurrentType(currentPos, mark);
+        	type = getCurrentType(currentPos, keyword);
             if (!type.equals("")) {
-            	if (type.equals(mark)) {
+            	if (type.equals(keyword)) {
             		indexOfDelimiter = getIndexOfElement(listEntity, ":", currentPos);
             	} else {
             		indexOfDelimiter = getIndexOfElement(listEntity, type, currentPos);
@@ -115,7 +167,8 @@ public class EntityReader {
                 }
                 
                 currentPos = findNextPart(indexOfDelimiter);
-            }
+            } else 
+            	break;
         }
         
         return result;
