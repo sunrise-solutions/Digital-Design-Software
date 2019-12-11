@@ -12,8 +12,10 @@ import javax.swing.JTable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.awt.BorderLayout;
 import javax.swing.SwingConstants;
@@ -22,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
 import Models.Entity;
@@ -44,6 +47,7 @@ public class Parser {
 	
 	private TableModel model;
 	private String sourceFile;
+	private String resultFile;
 	private Entity entity;
 
 	/**
@@ -81,7 +85,7 @@ public class Parser {
 		
 		menubar = new JMenuBar();
 		file = new JMenu("File");
-		open = new JMenuItem("Open");
+		open = new JMenuItem("Open source");
 		open.addActionListener(new ActionListener() {
 			@Override
             public void actionPerformed(ActionEvent arg0) {
@@ -89,7 +93,13 @@ public class Parser {
 			}
 		});
 		file.add(open);
-		save = new JMenuItem("Save");
+		save = new JMenuItem("Save result");
+		save.addActionListener(new ActionListener() {
+			@Override
+            public void actionPerformed(ActionEvent arg0) {
+                saveFile();
+            }
+		});
 		file.add(save);
 		exit = new JMenuItem("Exit");
 		exit.addActionListener(new ActionListener() {
@@ -184,6 +194,21 @@ public class Parser {
 		}
 	}
 	
+	private void saveFile() {
+		FileDialog fd = new FileDialog(frame, "Save", FileDialog.SAVE);
+		fd.setDirectory("C:\\VHDL_examples");
+		fd.setFile("*.vhd");
+		fd.setVisible(true);
+		try {
+			resultFile = fd.getDirectory() + fd.getFile();
+			BufferedWriter writer = new BufferedWriter(new FileWriter(resultFile));
+            writer.write(resultCode.getText());
+            writer.close();
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(frame, e.toString());
+		}
+	}
+	
 	private void parseFile(String content) {
 		try
         {
@@ -197,10 +222,8 @@ public class Parser {
             for (Item i : parser.entity.items) {
             	Item newIdentificator = GenerateObfuscatedIdentificator(i);
             	obfuscatedItems.add(newIdentificator);
-            	boolean check = content.contains(" " + i.Name + " ");
-            	while (content.contains(" " + i.Name + " ")) {
-            		content = content.replace(" " + i.Name + " ", " " + newIdentificator.Name + " ");
-    			}
+            	content = content.replace(" " + i.Name + " ", " " + newIdentificator.Name + " ");
+            	content = content.replace("\t" + i.Name + " ", "\t" + newIdentificator.Name + " ");
             }
             
             content = DeleteUncompiledSpaces(content);
@@ -226,35 +249,24 @@ public class Parser {
     
     
     private String AddSpacesToCode(String code) {
-		
-		String[] operators = {"(", ")", ":", ",", ";", "*", "/", "+", "-", "&", "=", "<", ">",       "'", "\"", "."};
-		String temp = "";
+		String[] operators = {"(", ")", ":", ",", ";", "*", "/", "+", "-", "&", "=", "<", ">", "'", "\"", "."};
 		String strToReplace = "";
 		for (String o : operators) {
-			temp = "";
-			while (code.contains(o)) {
-				strToReplace = " " + o + " ";
-				code = code.replace(o, strToReplace);
-				temp += code.substring(0, code.indexOf(strToReplace) + strToReplace.length() + 1);
-				code = code.substring(code.indexOf(strToReplace) + strToReplace.length());
-			}
-			temp += code;
-			code = temp;
+			strToReplace = " " + o + " ";
+			code = code.replace(o, strToReplace);
 		}
-		return temp;		
-		
+		return code;
 	}
     
     private String DeleteUncompiledSpaces(String code) {
-    	String[] compoundOperatorsForSearch = {"< =", ": =", "/ =", "> =", "* *",       " ' ", " \" ", " . "};
-		String[] compoundOperatorsForReplace = {"<=", ":=", "/=", ">=", "**",       "'", "\"", "."};
-		
-		for (int i = 0; i < compoundOperatorsForSearch.length; i++) {
-			while (code.contains(compoundOperatorsForSearch[i])) {
-				code = code.replace(compoundOperatorsForSearch[i], compoundOperatorsForReplace[i]);
-			}
+    	String[] compoundOperatorsForSearch = {"<  =", ":  =", "/  =", ">  =", "=  >", "*  *", " ' ", " \" ", " . ", " ;", "'u'", "'x'", "'z'", "'w'", "'l'", "'h'", "-  -"};
+		String[] compoundOperatorsForReplace = {"<=", ":=", "/=", ">=", "=>", "**", "'", "\"", ".", ";", "'U'", "'X'", "'Z'", "'W'", "'L'", "'H'", "--"};
+		String strToReplace = "";
+    	for (int i = 0; i < compoundOperatorsForSearch.length; i++) {
+    		strToReplace = compoundOperatorsForReplace[i];
+			code = code.replace(compoundOperatorsForSearch[i], strToReplace);
 		}
-		
-    	return code;
+		return code;
+    	
     }
 }
