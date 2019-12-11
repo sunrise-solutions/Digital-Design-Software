@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.awt.BorderLayout;
 import javax.swing.SwingConstants;
 import javax.swing.JTextArea;
@@ -26,7 +27,6 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import Models.Entity;
 import Models.FileParser;
 import Models.Item;
-import Models.Obfuscator;
 
 public class Parser {
 
@@ -187,19 +187,61 @@ public class Parser {
 	private void parseFile(String content) {
 		try
         {
+			content = content.toLowerCase();
 			entity = new Entity();
-            FileParser parser = new FileParser(content.toLowerCase());
+            FileParser parser = new FileParser(content);
             parser.ParseFile(entity);
             for (Item item: parser.entity.items) {
             	model.addFirstColumn(item.getName());
             	identTable.revalidate();
             }
-            Obfuscator obfuscator = new Obfuscator(content.toLowerCase(), parser.entity.items);
-            obfuscator.ObfuscateCode();
+            
+            ArrayList<Item> obfuscatedItems = new ArrayList<Item>();
+           
+            for (Item i : parser.entity.items) {
+            	Item newIdentificator = GenerateObfuscatedIdentificator(i);
+            	obfuscatedItems.add(newIdentificator);
+            	while (content.contains(" " + i.Name + " ")) {
+            		content.replace(" " + i.Name + " ", " " + newIdentificator + " ");
+    			}
+            }
+            parser.entity.AddObfuscatedItems(obfuscatedItems);
         }
         catch (Exception ex)
         {
         	JOptionPane.showMessageDialog(frame, ex.toString());
         }
 	}
+	
+    private Item GenerateObfuscatedIdentificator(Item identificator) {
+		Item i = new Item(identificator.Name + "TopSecret", identificator.Type);
+		return i;
+	}
+    
+    
+    private String AddSpacesToCode(String code) {
+		
+		String[] operators = {"(", ")", ":", ",", ";", "*", "/", "+", "-", "&", "=", "<", ">",       "'", "\"", "."};
+		
+		for (String o : operators) {
+			while (code.contains(o)) {
+				code.replace(o, " " + o + " ");
+			}
+		}
+		return code;		
+		
+	}
+    
+    private String DeleteUncompiledSpaces(String code) {
+    	String[] compoundOperatorsForSearch = {"< =", ": =", "/ =", "> =", "* *",       " ' ", " \" ", " . "};
+		String[] compoundOperatorsForReplace = {"<=", ":=", "/=", ">=", "**",       "'", "\"", "."};
+		
+		for (int i = 0; i < compoundOperatorsForSearch.length; i++) {
+			while (code.contains(compoundOperatorsForSearch[i])) {
+				code.replace(compoundOperatorsForSearch[i], compoundOperatorsForReplace[i]);
+			}
+		}
+		
+    	return code;
+    }
 }

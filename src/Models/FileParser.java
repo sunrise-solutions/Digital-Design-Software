@@ -44,5 +44,11 @@ public class FileParser {
         items.addAll(reader.getProcesses());
         items.addAll(reader.getProcessItems(entity, "process", "variable", "begin"));
         entity.AddItems(items);
-    } 
+    }
+    
+    
+    
+    
+    
+
 }

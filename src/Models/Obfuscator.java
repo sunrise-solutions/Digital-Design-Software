@@ -36,6 +36,9 @@ public class Obfuscator {
 		return code;
 	}
 	
+	
+	
+	
 	private Item GenerateObfuscatedIdentificator(Item identificator) {
 		Item i = new Item("Ho-Ho-Ho!", identificator.Type);
 		return i;
