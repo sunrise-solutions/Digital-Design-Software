@@ -191,21 +191,27 @@ public class Parser {
 			entity = new Entity();
             FileParser parser = new FileParser(content);
             parser.ParseFile(entity);
-            for (Item item: parser.entity.items) {
-            	model.addFirstColumn(item.getName());
-            	identTable.revalidate();
-            }
             
             ArrayList<Item> obfuscatedItems = new ArrayList<Item>();
-           
+            content = AddSpacesToCode(content);
             for (Item i : parser.entity.items) {
             	Item newIdentificator = GenerateObfuscatedIdentificator(i);
             	obfuscatedItems.add(newIdentificator);
+            	boolean check = content.contains(" " + i.Name + " ");
             	while (content.contains(" " + i.Name + " ")) {
-            		content.replace(" " + i.Name + " ", " " + newIdentificator + " ");
+            		content = content.replace(" " + i.Name + " ", " " + newIdentificator.Name + " ");
     			}
             }
+            
+            content = DeleteUncompiledSpaces(content);
             parser.entity.AddObfuscatedItems(obfuscatedItems);
+            
+            for (int i = 0; i < parser.entity.items.size(); i++) {
+            	model.addData(parser.entity.items.get(i).getName(), parser.entity.obfuscatedItems.get(i).getName());
+            	identTable.revalidate();
+            }
+            
+            resultCode.setText(content);
         }
         catch (Exception ex)
         {
@@ -222,13 +228,20 @@ public class Parser {
     private String AddSpacesToCode(String code) {
 		
 		String[] operators = {"(", ")", ":", ",", ";", "*", "/", "+", "-", "&", "=", "<", ">",       "'", "\"", "."};
-		
+		String temp = "";
+		String strToReplace = "";
 		for (String o : operators) {
+			temp = "";
 			while (code.contains(o)) {
-				code.replace(o, " " + o + " ");
+				strToReplace = " " + o + " ";
+				code = code.replace(o, strToReplace);
+				temp += code.substring(0, code.indexOf(strToReplace) + strToReplace.length() + 1);
+				code = code.substring(code.indexOf(strToReplace) + strToReplace.length());
 			}
+			temp += code;
+			code = temp;
 		}
-		return code;		
+		return temp;		
 		
 	}
     
@@ -238,7 +251,7 @@ public class Parser {
 		
 		for (int i = 0; i < compoundOperatorsForSearch.length; i++) {
 			while (code.contains(compoundOperatorsForSearch[i])) {
-				code.replace(compoundOperatorsForSearch[i], compoundOperatorsForReplace[i]);
+				code = code.replace(compoundOperatorsForSearch[i], compoundOperatorsForReplace[i]);
 			}
 		}
 		

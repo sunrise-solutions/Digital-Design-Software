@@ -18,9 +18,8 @@ public class TableModel extends AbstractTableModel {
 		}
 	}
 	
-	public void addData(String[] row) {
-		String[] rowTable = new String[getColumnCount()];
-		rowTable = row;
+	public void addData(String ident, String obfuscated) {
+		String[] rowTable = {ident, obfuscated};
 		data.add(rowTable);
 	}
 	
