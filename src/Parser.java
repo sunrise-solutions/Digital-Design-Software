@@ -16,7 +16,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.ArrayList;
 import java.awt.BorderLayout;
 import javax.swing.SwingConstants;
 import javax.swing.JTextArea;
@@ -24,12 +23,11 @@ import javax.swing.JLabel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
 import Models.Entity;
 import Models.FileParser;
-import Models.Item;
+import Models.Obfuscator;
 
 public class Parser {
 
@@ -78,9 +76,7 @@ public class Parser {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(50, 50, 1357, 732);
-		//frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		//frame.setVisible(true);
+		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		menubar = new JMenuBar();
@@ -174,7 +170,6 @@ public class Parser {
 	
 	private void openFile() {
 		FileDialog fd = new FileDialog(frame, "Choose a file", FileDialog.LOAD);
-		fd.setDirectory("C:\\VHDL_examples");
 		fd.setFile("*.vhd");
 		fd.setVisible(true);
 		try {
@@ -196,7 +191,6 @@ public class Parser {
 	
 	private void saveFile() {
 		FileDialog fd = new FileDialog(frame, "Save", FileDialog.SAVE);
-		fd.setDirectory("C:\\VHDL_examples");
 		fd.setFile("*.vhd");
 		fd.setVisible(true);
 		try {
@@ -217,17 +211,9 @@ public class Parser {
             FileParser parser = new FileParser(content);
             parser.ParseFile(entity);
             
-            ArrayList<Item> obfuscatedItems = new ArrayList<Item>();
-            content = AddSpacesToCode(content);
-            for (Item i : parser.entity.items) {
-            	Item newIdentificator = GenerateObfuscatedIdentificator(i);
-            	obfuscatedItems.add(newIdentificator);
-            	content = content.replace(" " + i.Name + " ", " " + newIdentificator.Name + " ");
-            	content = content.replace("\t" + i.Name + " ", "\t" + newIdentificator.Name + " ");
-            }
-            
-            content = DeleteUncompiledSpaces(content);
-            parser.entity.AddObfuscatedItems(obfuscatedItems);
+            Obfuscator obfuscator = new Obfuscator(content, parser.entity.items);
+            content = obfuscator.ObfuscateCode();
+            parser.entity.AddObfuscatedItems(obfuscator.GetObfuscatedIdentificators());
             
             for (int i = 0; i < parser.entity.items.size(); i++) {
             	model.addData(parser.entity.items.get(i).getName(), parser.entity.obfuscatedItems.get(i).getName());
@@ -241,32 +227,4 @@ public class Parser {
         	JOptionPane.showMessageDialog(frame, ex.toString());
         }
 	}
-	
-    private Item GenerateObfuscatedIdentificator(Item identificator) {
-		Item i = new Item(identificator.Name + "TopSecret", identificator.Type);
-		return i;
-	}
-    
-    
-    private String AddSpacesToCode(String code) {
-		String[] operators = {"(", ")", ":", ",", ";", "*", "/", "+", "-", "&", "=", "<", ">", "'", "\"", "."};
-		String strToReplace = "";
-		for (String o : operators) {
-			strToReplace = " " + o + " ";
-			code = code.replace(o, strToReplace);
-		}
-		return code;
-	}
-    
-    private String DeleteUncompiledSpaces(String code) {
-    	String[] compoundOperatorsForSearch = {"<  =", ":  =", "/  =", ">  =", "=  >", "*  *", " ' ", " \" ", " . ", " ;", "'u'", "'x'", "'z'", "'w'", "'l'", "'h'", "-  -"};
-		String[] compoundOperatorsForReplace = {"<=", ":=", "/=", ">=", "=>", "**", "'", "\"", ".", ";", "'U'", "'X'", "'Z'", "'W'", "'L'", "'H'", "--"};
-		String strToReplace = "";
-    	for (int i = 0; i < compoundOperatorsForSearch.length; i++) {
-    		strToReplace = compoundOperatorsForReplace[i];
-			code = code.replace(compoundOperatorsForSearch[i], strToReplace);
-		}
-		return code;
-    	
-    }
 }

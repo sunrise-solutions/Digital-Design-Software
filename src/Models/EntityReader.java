@@ -3,16 +3,11 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class EntityReader {
-	File currentfile;
     public String fileContent;
     private String space = " ";
 
     ArrayList<String> listContent = new ArrayList<String>();
     ArrayList<String> listEntity = new ArrayList<String>();
-
-    ArrayList<String> contentIn = new ArrayList<String>();
-    ArrayList<String> contentOut = new ArrayList<String>();
-
 
     public EntityReader(String content) {
         fileContent = content;
@@ -117,7 +112,6 @@ public class EntityReader {
             entityName = listContent.get(indexOfEntity + 1);
         component.Name = entityName;
         
-        //indexOfEnd = listContent.indexOf("end");
         for (int i = indexOfStart + 1; i < listContent.size(); i++) {                
             if(listContent.get(i).contains(lowerBound)) {
             	indexOfEnd = i;
